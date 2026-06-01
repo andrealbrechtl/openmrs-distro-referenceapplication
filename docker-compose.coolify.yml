@@ -1,0 +1,74 @@
+services:
+  gateway:
+    image: openmrs/openmrs-reference-application-3-gateway:${TAG:-qa}
+    restart: unless-stopped
+    depends_on:
+      frontend:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
+    ports:
+      - "80:80"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: andrealbrechtl/openmrs-reference-application-3-frontend:custom
+    restart: unless-stopped
+    environment:
+      SPA_PATH: /openmrs/spa
+      API_URL: /openmrs
+      SPA_CONFIG_URLS: /openmrs/spa/config-core_demo.json
+      SPA_DEFAULT_LOCALE: ""
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      backend:
+        condition: service_healthy
+
+  backend:
+    image: openmrs/openmrs-reference-application-3-backend:${TAG:-qa}
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      OMRS_CONFIG_MODULE_WEB_ADMIN: "true"
+      OMRS_CONFIG_AUTO_UPDATE_DATABASE: "true"
+      OMRS_CONFIG_CREATE_TABLES: "true"
+      OMRS_CONFIG_CONNECTION_SERVER: db
+      OMRS_CONFIG_CONNECTION_DATABASE: openmrs
+      OMRS_CONFIG_CONNECTION_USERNAME: ${OMRS_DB_USER:-openmrs}
+      OMRS_CONFIG_CONNECTION_PASSWORD: ${OMRS_DB_PASSWORD:-${SERVICE_PASSWORD_OMRS_DB}}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/openmrs"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - openmrs-data:/openmrs/data
+
+  db:
+    image: mariadb:10.11.7
+    restart: unless-stopped
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci
+    healthcheck:
+      test: ["CMD-SHELL", "mysql --user=$${MYSQL_USER} --password=$${MYSQL_PASSWORD} --execute \"SHOW DATABASES;\""]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    environment:
+      MYSQL_DATABASE: openmrs
+      MYSQL_USER: ${OMRS_DB_USER:-openmrs}
+      MYSQL_PASSWORD: ${OMRS_DB_PASSWORD:-${SERVICE_PASSWORD_OMRS_DB}}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-${SERVICE_PASSWORD_MYSQL_ROOT}}
+    volumes:
+      - db-data:/var/lib/mysql
+
+volumes:
+  openmrs-data:
+  db-data:
