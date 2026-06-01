@@ -7,8 +7,6 @@ services:
         condition: service_healthy
       backend:
         condition: service_healthy
-    ports:
-      - "80:80"
 
   frontend:
     build:
