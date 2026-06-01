@@ -16,6 +16,21 @@
     }
   },
   "@openmrs/esm-styleguide": {
-    "Brand color #1": "#005d5d"
+    "Brand color #1": "#60b0f4",
+    "Brand color #2": "#a2bdfa",
+    "Brand color #3": "#60b0f4"
+  },
+  "@openmrs/esm-login-app": {
+    "logo": {
+      "src": "${openmrsSpaBase}/logo-white.png",
+      "alt": "APTriagem Logo"
+    }
+  },
+  "@openmrs/esm-primary-navigation-app": {
+    "logo": {
+      "src": "${openmrsSpaBase}/logo-blue.png",
+      "alt": "APTriagem Logo",
+      "link": "${openmrsSpaBase}/home"
+    }
   }
 }

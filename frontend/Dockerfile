@@ -41,5 +41,7 @@ COPY nginx.conf /etc/nginx/nginx.conf
 
 COPY --from=dev /app/spa /usr/share/nginx/html
 COPY config-core_demo.json /usr/share/nginx/html
+COPY logo-white.png /usr/share/nginx/html/logo-white.png
+COPY logo-blue.png /usr/share/nginx/html/logo-blue.png
 
 CMD ["/usr/local/bin/startup.sh"]
